@@ -1,0 +1,106 @@
+#!/bin/sh
+
+# mdpv (markdown preview)
+# Preview current Acme window's or a given Markdown file in a browser
+# Assumes the Markdown-to-HTML converter writes its output to stdout
+
+set -e
+
+# Process command line options and their arguments
+while [ "$#" -gt 0 ]; do
+	case $1 in
+		-h)
+			cat <<EOF
+Preview current Acme window's or a given Markdown file in a browser.
+
+Usage: $(basename $0) [-h] [-c convertcmd] [-t tmpfile] [mdfile]
+
+-h shows usage and exits
+-c convertcmd sets the conversion command to convertcmd
+    (default: "pandoc --mathml --section-divs --standalone" or "multimarkdown --full")
+-t tmpfile sets the temporary HTML file generated to tmpfile
+    (default: ~/Downloads/__tmp__.html for garcon-url-handler or /tmp/tmp.html otherwise)
+mdfile is the path to a Markdown file
+    (default: current window file if run from within Acme)
+
+Note that the specified converter command is expected to output the
+resulting HTML code to stdout.
+
+Additionally, the temporary HTML file is not automatically cleaned up
+by this script.
+
+$PLAN9/bin/web is used to launch a browser, that can be set using the
+BROWSER environment variable.
+EOF
+			exit
+			;;
+		-c)
+			if [ -n "$2" ]; then
+				CONVERT="$2"
+				shift; shift
+			else
+				echo "-c requires a non-empty option argument that is a command (with args if needed)" 1>&2
+				exit 1
+			fi
+			;;
+		-t)
+			if [ -n "$2" ]; then
+				TMPFILE="$2"
+				shift; shift
+			else
+				echo "-t requires a non-empty option argument that is a file path" 1>&2
+				exit 1
+			fi
+			;;
+		*)
+			MDFILE=$1
+			shift
+			break
+	esac
+done
+
+# Check that there are no extra arguments
+if [ "$#" -gt 1 ]; then
+	echo 'must specify exactly zero or one file' 1>&2
+	exit 1
+fi
+
+# Automatically set Markdown source file as needed (only when calling from Acme)
+if [ -z "$MDFILE" ]; then
+	if [ -z "$samfile" ]; then
+		echo 'no file specified and not running in Acme'
+		exit 1
+	else
+		MDFILE=$samfile
+	fi
+fi
+
+# Automatically set conversion command if not specified
+if [ -z "$CONVERT" ]; then
+	if command -v pandoc 1>/dev/null 2>&1; then
+		CONVERT="pandoc --mathml --section-divs --standalone"
+	elif command -v multimarkdown 1>/dev/null 2>&1; then
+		CONVERT="multimarkdown --full"
+	else
+		echo 'convert command not set using -c option and no auto-detected Markdown converter installed'
+		exit 1
+	fi
+fi
+
+# Automatically set temporary HTML file path if not specified
+if [ -z "$TMPFILE" ]; then
+	# If using garcon-url-handler, the host browser cannot access files
+	# outside the user directory tree, so work around by saving to the
+	# user's Downloads directory
+	if [ "$BROWSER" = "garcon-url-handler" ]; then
+		TMPFILE="$HOME/Downloads/__tmp__.html"
+	else
+		TMPFILE=/tmp/tmp.html
+	fi
+fi
+
+# Convert Markdown to HTML, assumes converter writes output to stdout
+$CONVERT "$MDFILE" >"$TMPFILE"
+
+# Open HTML file in browser
+web "$TMPFILE"

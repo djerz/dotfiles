@@ -1,0 +1,164 @@
+#!/bin/sh
+
+# Configure current Acme window for a programming language
+
+set -e
+
+if [ "$winid" = "" ]; then
+	echo 'must be used from within acme' 1>&2
+	exit 1
+fi
+
+ADDTAGS="win :0 :$ EC Edit Fcycle F++ F--"
+
+if [ "$#" -eq 0 ]; then
+	cat <<EOF
+Set up current Acme window for programming.
+
+Configures space or tab indentation, auto-indent,
+and tagbar for the window for the given language.
+
+Usage: $(basename $0) [bqn|js|lisp|py|racket|sh]
+
+Supported languages:
+bqn (BQN), js (Javascript), lisp (Lisp), md (Markdown),
+py (Python), rkt (Racket), rs (Rust), sh (Shell)
+
+If no option is specified, show usage and exit.
+EOF
+	exit
+elif [ "$#" -eq 1 ]; then
+	case $1 in
+		bqn)
+			acmeexec "Tab 2"
+			acmeexec "Spaces on"
+			acmeexec "Indent on"
+			ADDTAGS="$ADDTAGS (|c+ '# ') (|c- '# ') (|s+ 2) (|s- 2)"
+			# https://mlochbaum.github.io/BQN/spec/token.html
+			9 echo 'It is recommended to copy the next symbols to a guide file for copy-pasting'
+			9 echo -n '⟦ '
+			# Null literal
+			9 echo -n '@ '
+			# Primitives
+			9 echo -n '▀ +-×÷⋆√⌊⌈|¬∧∨<>≠=≤≥≡≢⊣⊢⥊∾≍⋈↑↓↕«»⌽⍉/⍋⍒⊏⊑⊐⊒∊⍷⊔! '
+			# Primitive 1-modifiers
+			9 echo -n '▀ ˙˜˘¨⌜⁼´˝\` '
+			# Primitive 2-modifiers
+			9 echo -n '▀ ∘○⊸⟜⌾⊘◶⎉⚇⍟⎊ '
+			# Special names
+			9 echo -n '▀ 𝕨𝕩𝕗𝕘𝕤𝕎𝕏𝔽𝔾𝕊 '
+			# Punctuation
+			9 echo -n '▀ ←⇐↩(){}⟨⟩[]‿·⋄,.;:? '
+			9 echo -n '⟧'
+			9 echo ''
+			;;
+		js)
+			acmeexec "Tab 2"
+			acmeexec "Spaces on"
+			acmeexec "Indent on"
+			ADDTAGS="$ADDTAGS (|c+ '// ') (|c- '// ') (|s+ 2) (|s- 2) |surround"
+			;;
+		lisp)
+			acmeexec "Tab 2"
+			acmeexec "Spaces on"
+			acmeexec "Indent on"
+			ADDTAGS="$ADDTAGS (|c+ ';; ') (|c- ';; ') (|s+ 2) (|s- 2) |surround"
+			# https://github.com/ChristopherSegale/match-paren
+			if command -v mp >/dev/null 2>&1; then
+				ADDTAGS="$ADDTAGS |mp"
+			fi
+			;;
+		md)
+			acmeexec "Tab 4"
+			acmeexec "Spaces on"
+			acmeexec "Indent on"
+			ADDTAGS="$ADDTAGS |s+ |s- |w+ |w-"
+			ADDTAGS="$ADDTAGS |mdlink mdpv"
+			;;
+		py)
+			acmeexec "Tab 4"
+			acmeexec "Spaces on"
+			acmeexec "Indent on"
+			ADDTAGS="$ADDTAGS (|c+ '# ') (|c- '# ') |s+ |s-"
+			# https://github.com/psf/black
+			if command -v black >/dev/null 2>&1; then
+				ADDTAGS="$ADDTAGS (|black -q -)"
+			fi
+			# https://github.com/astral-sh/ruff
+			if command -v ruff >/dev/null 2>&1; then
+				ADDTAGS="$ADDTAGS (ruff check \$% | noansi)"
+				ADDTAGS="$ADDTAGS (|ruff format -)"
+			fi
+			;;
+		rkt)
+			acmeexec "Tab 2"
+			acmeexec "Spaces on"
+			acmeexec "Indent on"
+			ADDTAGS="$ADDTAGS (|c+ '; ') (|c- '; ') (|s+ 2) (|s- 2) |surround"
+			# https://github.com/ChristopherSegale/match-paren
+			if command -v mp >/dev/null 2>&1; then
+				ADDTAGS="$ADDTAGS |mp"
+			fi
+			# https://docs.racket-lang.org/fmt/
+			if $(raco help fmt >/dev/null 2>&1); then
+				ADDTAGS="$ADDTAGS (|raco fmt)"
+			fi
+			# https://github.com/Bogdanp/racket-review
+			if $(raco help review >/dev/null 2>&1); then
+				ADDTAGS="$ADDTAGS (raco review \$%)"
+			fi
+			ADDTAGS="$ADDTAGS (win racket)"
+			;;
+		rs)
+			acmeexec "Tab 4"
+			acmeexec "Spaces on"
+			acmeexec "Indent on"
+			ADDTAGS="$ADDTAGS (|c+ '// ') (|c- '// ') |s+ |s-"
+			# https://github.com/rust-lang/rustfmt
+			if command -v rustfmt >/dev/null 2>&1; then
+				ADDTAGS="$ADDTAGS |rustfmt"
+			fi
+			;;
+		sh)
+			acmeexec "Indent on"
+			ADDTAGS="$ADDTAGS |c+ |c-"
+			# https://github.com/mvdan/sh
+			if command -v shfmt >/dev/null 2>&1; then
+				ADDTAGS="$ADDTAGS |shfmt"
+			fi
+			# https://github.com/koalaman/shellcheck
+			if command -v shellcheck >/dev/null 2>&1; then
+				ADDTAGS="$ADDTAGS (shellcheck -f gcc -s sh \`{basename \$%})"
+			fi
+			;;
+		zig)
+			acmeexec "Tab 4"
+			acmeexec "Spaces on"
+			acmeexec "Indent on"
+			ADDTAGS="$ADDTAGS (|c+ '// ') (|c- '// ') |s+ |s-"
+			if command -v zig >/dev/null 2>&1; then
+				ADDTAGS="$ADDTAGS (|zig fmt --color off --stdin)"
+			fi
+			;;
+		*)
+			9 echo "unsupported language: $1" 1>&2
+			exit 1
+	esac
+else
+	9 echo "only one language can be specified, but two or more provided: $@" 1>&2
+	exit 1
+fi
+
+# Store tag right of first '|'
+TAGRIGHT=`9p read acme/$winid/tag | 9 awk -v RS='\0' '{ st = index($0,"|"); print substr($0,st+1)}'`
+
+# Replace Conf command in tag with new tags to add
+9 echo -n "nomenu" | 9p write acme/$winid/ctl   # disable menu autoupdate
+9 echo -n "cleartag" | 9p write acme/$winid/ctl # clear tag right of first '|'
+9 echo -n "$TAGRIGHT" | awk -v RS='\0' "
+{
+	sub(/$(basename $0) +$1/,\"$ADDTAGS\",\$0);
+	printf \"%s\", \$0
+}
+" | 9p write acme/$winid/tag                    # write back tag with "Conf LANG" replaced
+9 echo -n "menu" | 9p write acme/$winid/ctl     # re-enable menu autoupdate

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Underline STDIN or piped text with argument character (default is '-')
+
+ULINECHAR=${1:-"-"}
+ULINECHAR=`echo $ULINECHAR | sed -e 's/"/\\\\"/g'` # escape double-quotes
+
+awk "{print;gsub(/./,\"${ULINECHAR}\");print}"
