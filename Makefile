@@ -12,6 +12,11 @@ bin: ## Installs the bin directory files.
 		ln -sf $$file $(HOME)/bin/$$f; \
 	done
 
+.PHONY: clean
+clean: ##Clean evrything if dotfiles is removed
+	# delete ~/bin broken symlinks
+	find $(HOME)/bin -xtype l -delete
+
 #.PHONY: dotfiles
 #dotfiles: ## Installs the dotfiles.
 #	# add aliases for dotfiles
