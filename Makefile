@@ -1,7 +1,14 @@
 SHELL := bash
 
 .PHONY: all
-all: bin usr dotfiles etc ## Installs the bin and etc directory files and the dotfiles.
+all: folders bin usr dotfiles etc ## Installs the bin and etc directory files and the dotfiles.
+
+.PHONY: folders
+folders: ## Create home folders structure
+	mkdir -p $(HOME)/bin/acme
+	mkdir -p $(HOME)/local/share/applications
+	mkdir -p $(HOME)/lib
+	mkdir -p $(HOME)/notes
 
 .PHONY: bin
 bin: ## Installs the bin directory files.
@@ -9,7 +16,7 @@ bin: ## Installs the bin directory files.
 	mkdir -p $(HOME)/bin
 	for file in $(shell find $(CURDIR)/bin -type f -not -name ".*.swp"); do \
 		f=$$(basename $$file); \
-		ln -sf $$file $(HOME)/bin/$$f; \
+		ln -sfn $$file $(HOME)/bin/$$f; \
 	done
 
 .PHONY: clean
@@ -91,3 +98,4 @@ shellcheck: ## Runs the shellcheck tests on the scripts.
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "%-30s %s\n", $$1, $$2}'
+

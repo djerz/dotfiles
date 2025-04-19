@@ -15,7 +15,7 @@ set -o pipefail
 # ---
 
 # install.sh
-#	This script installs my basic setup for a debian laptop
+#	This script installs my basic setup for a debian/ubuntu laptop
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -59,26 +59,26 @@ setup_sources_min() {
 		lsb-release \
 		--no-install-recommends
 
-	# hack for latest git (don't judge)
-	cat <<-EOF > /etc/apt/sources.list.d/git-core.list
-	deb http://ppa.launchpad.net/git-core/ppa/ubuntu xenial main
-	deb-src http://ppa.launchpad.net/git-core/ppa/ubuntu xenial main
-	EOF
-
-	# iovisor/bcc-tools
-	cat <<-EOF > /etc/apt/sources.list.d/iovisor.list
-	deb https://repo.iovisor.org/apt/xenial xenial main
-	EOF
-
-	# add the git-core ppa gpg key
-	apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys E1DD270288B4E6030699E45FA1715D88E1DF1F24
-
-	# add the iovisor/bcc-tools gpg key
-	apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 648A4A16A23015EEF4A66B8E4052245BD4284CDD
-
-	# turn off translations, speed up apt update
-	mkdir -p /etc/apt/apt.conf.d
-	echo 'Acquire::Languages "none";' > /etc/apt/apt.conf.d/99translations
+#	# hack for latest git (don't judge)
+#	cat <<-EOF > /etc/apt/sources.list.d/git-core.list
+#	deb http://ppa.launchpad.net/git-core/ppa/ubuntu xenial main
+#	deb-src http://ppa.launchpad.net/git-core/ppa/ubuntu xenial main
+#	EOF
+#
+#	# iovisor/bcc-tools
+#	cat <<-EOF > /etc/apt/sources.list.d/iovisor.list
+#	deb https://repo.iovisor.org/apt/xenial xenial main
+#	EOF
+#
+#	# add the git-core ppa gpg key
+#	apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys E1DD270288B4E6030699E45FA1715D88E1DF1F24
+#
+#	# add the iovisor/bcc-tools gpg key
+#	apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 648A4A16A23015EEF4A66B8E4052245BD4284CDD
+#
+#	# turn off translations, speed up apt update
+#	mkdir -p /etc/apt/apt.conf.d
+#	echo 'Acquire::Languages "none";' > /etc/apt/apt.conf.d/99translations
 }
 
 # sets up apt sources
@@ -86,46 +86,50 @@ setup_sources_min() {
 setup_sources() {
 	setup_sources_min;
 
-	cat <<-EOF > /etc/apt/sources.list
-	deb http://httpredir.debian.org/debian sid main contrib non-free
-	deb-src http://httpredir.debian.org/debian/ sid main contrib non-free
-	EOF
-
-	# yubico
-	cat <<-EOF > /etc/apt/sources.list.d/yubico.list
-	deb http://ppa.launchpad.net/yubico/stable/ubuntu xenial main
-	deb-src http://ppa.launchpad.net/yubico/stable/ubuntu xenial main
-	EOF
-
-	# Add the Cloud SDK distribution URI as a package source
-	cat <<-EOF > /etc/apt/sources.list.d/google-cloud-sdk.list
-	deb https://packages.cloud.google.com/apt cloud-sdk main
-	EOF
-
-	# Import the Google Cloud Platform public key
-	curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-
-	# Add the Google Chrome distribution URI as a package source
-	cat <<-EOF > /etc/apt/sources.list.d/google-chrome.list
-	deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
-	EOF
-
-	# Import the Google Chrome public key
-	curl https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-
-	# add the yubico ppa gpg key
-	apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 3653E21064B19D134466702E43D5C49532CBA1A9
+#	cat <<-EOF > /etc/apt/sources.list
+#	deb http://httpredir.debian.org/debian sid main contrib non-free
+#	deb-src http://httpredir.debian.org/debian/ sid main contrib non-free
+#	EOF
+#
+#	# yubico
+#	cat <<-EOF > /etc/apt/sources.list.d/yubico.list
+#	deb http://ppa.launchpad.net/yubico/stable/ubuntu xenial main
+#	deb-src http://ppa.launchpad.net/yubico/stable/ubuntu xenial main
+#	EOF
+#
+#	# Add the Cloud SDK distribution URI as a package source
+#	cat <<-EOF > /etc/apt/sources.list.d/google-cloud-sdk.list
+#	deb https://packages.cloud.google.com/apt cloud-sdk main
+#	EOF
+#
+#	# Import the Google Cloud Platform public key
+#	curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+#
+#	# Add the Google Chrome distribution URI as a package source
+#	cat <<-EOF > /etc/apt/sources.list.d/google-chrome.list
+#	deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
+#	EOF
+#
+#	# Import the Google Chrome public key
+#	curl https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+#
+#	# add the yubico ppa gpg key
+#	apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 3653E21064B19D134466702E43D5C49532CBA1A9
 }
 
 base_min() {
 	apt update || true
 	apt -y upgrade
 
+	# Package candidates
+	# bc \
+	# jq \
+	# silversearcher-ag \
+	#
 	apt install -y \
 		adduser \
 		automake \
 		bash-completion \
-		bc \
 		bzip2 \
 		ca-certificates \
 		coreutils \
@@ -142,7 +146,6 @@ base_min() {
 		hostname \
 		indent \
 		iptables \
-		jq \
 		less \
 		libc6-dev \
 		locales \
@@ -151,7 +154,6 @@ base_min() {
 		mount \
 		net-tools \
 		policykit-1 \
-		silversearcher-ag \
 		ssh \
 		strace \
 		sudo \
@@ -168,7 +170,7 @@ base_min() {
 	apt autoclean -y
 	apt clean -y
 
-	install_scripts
+	#install_scripts
 }
 
 # installs base packages
@@ -179,25 +181,29 @@ base() {
 	apt update || true
 	apt -y upgrade
 
+	# Package candidates
+	# google-cloud-sdk \
+	# cgroupfs-mount \
+	# iwd \
+	# libpcsclite-dev \
+	# libseccomp-dev \
+	# pcscd \
+	# libltdl-dev \
+	# scdaemon \
+	#
 	apt install -y \
 		apparmor \
 		bridge-utils \
-		cgroupfs-mount \
 		fwupd \
 		fwupdate \
 		gnupg-agent \
-		google-cloud-sdk \
-		iwd \
 		libapparmor-dev \
 		libimobiledevice6 \
-		libltdl-dev \
 		libpam-systemd \
-		libpcsclite-dev \
-		libseccomp-dev \
-		pcscd \
 		pinentry-curses \
-		scdaemon \
 		systemd \
+		build-essential \
+		xorg-dev \
 		--no-install-recommends
 
 	setup_sudo
@@ -255,26 +261,26 @@ setup_sudo() {
 
 	# add user to systemd groups
 	# then you wont need sudo to view logs and shit
-	gpasswd -a "$TARGET_USER" systemd-journal
-	gpasswd -a "$TARGET_USER" systemd-network
+#	gpasswd -a "$TARGET_USER" systemd-journal
+#	gpasswd -a "$TARGET_USER" systemd-network
 
 	# create docker group
 	sudo groupadd docker
 	sudo gpasswd -a "$TARGET_USER" docker
 
 	# add go path to secure path
-	{ \
-		echo -e "Defaults	secure_path=\"/usr/local/go/bin:/home/${TARGET_USER}/.go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/bcc/tools:/home/${TARGET_USER}/.cargo/bin\""; \
-		echo -e 'Defaults	env_keep += "ftp_proxy http_proxy https_proxy no_proxy GOPATH EDITOR"'; \
-		echo -e "${TARGET_USER} ALL=(ALL) NOPASSWD:ALL"; \
-		echo -e "${TARGET_USER} ALL=NOPASSWD: /sbin/ifconfig, /sbin/ifup, /sbin/ifdown, /sbin/ifquery"; \
-	} >> /etc/sudoers
+#	{ \
+#		echo -e "Defaults	secure_path=\"/usr/local/go/bin:/home/${TARGET_USER}/.go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/bcc/tools:/home/${TARGET_USER}/.cargo/bin\""; \
+#		echo -e 'Defaults	env_keep += "ftp_proxy http_proxy https_proxy no_proxy GOPATH EDITOR"'; \
+#		echo -e "${TARGET_USER} ALL=(ALL) NOPASSWD:ALL"; \
+#		echo -e "${TARGET_USER} ALL=NOPASSWD: /sbin/ifconfig, /sbin/ifup, /sbin/ifdown, /sbin/ifquery"; \
+#	} >> /etc/sudoers
 
 	# setup downloads folder as tmpfs
 	# that way things are removed on reboot
 	# i like things clean but you may not want this
-	mkdir -p "/home/$TARGET_USER/Downloads"
-	echo -e "\\n# tmpfs for downloads\\ntmpfs\\t/home/${TARGET_USER}/Downloads\\ttmpfs\\tnodev,nosuid,size=50G\\t0\\t0" >> /etc/fstab
+#	mkdir -p "/home/$TARGET_USER/Downloads"
+#	echo -e "\\n# tmpfs for downloads\\ntmpfs\\t/home/${TARGET_USER}/Downloads\\ttmpfs\\tnodev,nosuid,size=50G\\t0\\t0" >> /etc/fstab
 }
 
 # install rust
@@ -440,30 +446,30 @@ install_graphics() {
 	apt install -y "${pkgs[@]}" --no-install-recommends
 }
 
-# install custom scripts/binaries
-install_scripts() {
-	# install speedtest
-	curl -sSL https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py  > /usr/local/bin/speedtest
-	chmod +x /usr/local/bin/speedtest
-
-	# install icdiff
-	curl -sSL https://raw.githubusercontent.com/jeffkaufman/icdiff/master/icdiff > /usr/local/bin/icdiff
-	curl -sSL https://raw.githubusercontent.com/jeffkaufman/icdiff/master/git-icdiff > /usr/local/bin/git-icdiff
-	chmod +x /usr/local/bin/icdiff
-	chmod +x /usr/local/bin/git-icdiff
-
-	# install lolcat
-	curl -sSL https://raw.githubusercontent.com/tehmaze/lolcat/master/lolcat > /usr/local/bin/lolcat
-	chmod +x /usr/local/bin/lolcat
-
-
-	local scripts=( have light )
-
-	for script in "${scripts[@]}"; do
-		curl -sSL "https://misc.j3ss.co/binaries/$script" > "/usr/local/bin/${script}"
-		chmod +x "/usr/local/bin/${script}"
-	done
-}
+## install custom scripts/binaries
+#install_scripts() {
+#	# install speedtest
+#	curl -sSL https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py  > /usr/local/bin/speedtest
+#	chmod +x /usr/local/bin/speedtest
+#
+#	# install icdiff
+#	curl -sSL https://raw.githubusercontent.com/jeffkaufman/icdiff/master/icdiff > /usr/local/bin/icdiff
+#	curl -sSL https://raw.githubusercontent.com/jeffkaufman/icdiff/master/git-icdiff > /usr/local/bin/git-icdiff
+#	chmod +x /usr/local/bin/icdiff
+#	chmod +x /usr/local/bin/git-icdiff
+#
+#	# install lolcat
+#	curl -sSL https://raw.githubusercontent.com/tehmaze/lolcat/master/lolcat > /usr/local/bin/lolcat
+#	chmod +x /usr/local/bin/lolcat
+#
+#
+#	local scripts=( have light )
+#
+#	for script in "${scripts[@]}"; do
+#		curl -sSL "https://misc.j3ss.co/binaries/$script" > "/usr/local/bin/${script}"
+#		chmod +x "/usr/local/bin/${script}"
+#	done
+#}
 
 # install stuff for i3 window manager
 install_wmapps() {
@@ -531,6 +537,40 @@ get_dotfiles() {
 	install_vim;
 }
 
+install_acme() {
+	# sorry XDG basedir-spec, I don't like .local
+	mkdir -p "${HOME}/local/share/applications"
+	mkdir -p "${HOME}/lib"
+	mkdir -p "${HOME}/bin/acme"
+
+	# plan9port-config
+	# create subshell
+	(
+	if [[ ! -d "${HOME}/local/plan9port-config" ]]; then
+		cd "${HOME}/local"
+		git clone git@github.com:djerz/plan9port-config.git
+	fi
+	cd "${HOME}/local/plan9port-config"
+
+	find "${PWD}/stow/dot-acme/bin" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/bin/acme/" \;
+	find "${PWD}/stow/dot-local/bin" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/bin/" \;
+	find "${PWD}/stow/lib" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/lib/" \;
+	)
+
+	# plan9port
+	# create subshell
+	(
+	#TODO: patch from plan9port-config
+	if [[ ! -d "${HOME}/local/plan9port" ]]; then
+		cd "${HOME}/local"
+		git clone git@github.com:djerz/plan9port.git
+	fi
+	cd "${HOME}/local/plan9port"
+	./INSTALL -b
+	./INSTALL -c
+	)
+}
+
 install_vim() {
 	# Install node, needed for coc.vim
 	curl -sSL https://deb.nodesource.com/key/nodesource.gpg.key | sudo apt-key add -
@@ -594,17 +634,18 @@ install_tools() {
 usage() {
 	echo -e "install.sh\\n\\tThis script installs my basic setup for a debian laptop\\n"
 	echo "Usage:"
-	echo "  base                                - setup sources & install base pkgs"
 	echo "  basemin                             - setup sources & install base min pkgs"
-	echo "  graphics {intel, geforce, optimus}  - install graphics drivers"
-	echo "  wm                                  - install window manager/desktop pkgs"
-	echo "  dotfiles                            - get dotfiles"
-	echo "  vim                                 - install vim specific dotfiles"
-	echo "  golang                              - install golang and packages"
-	echo "  rust                                - install rust"
-	echo "  scripts                             - install scripts"
-	echo "  tools                               - install golang, rust, and scripts"
-	echo "  dropbear                            - install and configure dropbear initramfs"
+	echo "  base                                - setup sources & install base pkgs"
+#	echo "  graphics {intel, geforce, optimus}  - install graphics drivers"
+#	echo "  wm                                  - install window manager/desktop pkgs"
+#	echo "  dotfiles                            - get dotfiles"
+	echo "  acme                                - install acme"
+#	echo "  vim                                 - install vim specific dotfiles"
+#	echo "  golang                              - install golang and packages"
+#	echo "  rust                                - install rust"
+#	echo "  scripts                             - install scripts"
+#	echo "  tools                               - install golang, rust, and scripts"
+#	echo "  dropbear                            - install and configure dropbear initramfs"
 }
 
 main() {
@@ -623,14 +664,14 @@ main() {
 		setup_sources
 
 		base
-#	elif [[ $cmd == "basemin" ]]; then
-#		check_is_sudo
-#		get_user
-#
-#		# setup /etc/apt/sources.list
-#		setup_sources_min
-#
-#		base_min
+	elif [[ $cmd == "basemin" ]]; then
+		check_is_sudo
+		get_user
+
+		# setup /etc/apt/sources.list
+		setup_sources_min
+
+		base_min
 #	elif [[ $cmd == "graphics" ]]; then
 #		check_is_sudo
 #
@@ -640,6 +681,8 @@ main() {
 #	elif [[ $cmd == "dotfiles" ]]; then
 #		get_user
 #		get_dotfiles
+	elif [[ $cmd == "acme" ]]; then
+		install_acme
 #	elif [[ $cmd == "vim" ]]; then
 #		install_vim
 #	elif [[ $cmd == "rust" ]]; then
