@@ -2,10 +2,17 @@
 set -e
 set -o pipefail
 
-#---
-# TODO
-# shellcheck
-#---
+# ---
+# Folder structure
+# ---
+# ~/bin/
+# ~/bin/acme/
+# ~/lib/guide
+# ~/lib/plumbing
+# ~/local/plan9port/
+# ~/local/plan9port-config/
+# ~/notes/
+# ---
 
 # install.sh
 #	This script installs my basic setup for a debian laptop
@@ -526,7 +533,7 @@ get_dotfiles() {
 
 install_vim() {
 	# Install node, needed for coc.vim
-	curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -
+	curl -sSL https://deb.nodesource.com/key/nodesource.gpg.key | sudo apt-key add -
 
 	# FROM: https://github.com/nodesource/distributions/blob/master/README.md
 	# Replace with the branch of Node.js or io.js you want to install: node_6.x,
@@ -616,39 +623,40 @@ main() {
 		setup_sources
 
 		base
-	elif [[ $cmd == "basemin" ]]; then
-		check_is_sudo
-		get_user
+#	elif [[ $cmd == "basemin" ]]; then
+#		check_is_sudo
+#		get_user
+#
+#		# setup /etc/apt/sources.list
+#		setup_sources_min
+#
+#		base_min
+#	elif [[ $cmd == "graphics" ]]; then
+#		check_is_sudo
+#
+#		install_graphics "$2"
+#	elif [[ $cmd == "wm" ]]; then
+#		install_wmapps
+#	elif [[ $cmd == "dotfiles" ]]; then
+#		get_user
+#		get_dotfiles
+#	elif [[ $cmd == "vim" ]]; then
+#		install_vim
+#	elif [[ $cmd == "rust" ]]; then
+#		install_rust
+#	elif [[ $cmd == "golang" ]]; then
+#		install_golang "$2"
+#	elif [[ $cmd == "scripts" ]]; then
+#		install_scripts
+#	elif [[ $cmd == "tools" ]]; then
+#		install_tools
+#	elif [[ $cmd == "dropbear" ]]; then
+#		check_is_sudo
+#
+#		get_user
+#
+#		install_dropbear
 
-		# setup /etc/apt/sources.list
-		setup_sources_min
-
-		base_min
-	elif [[ $cmd == "graphics" ]]; then
-		check_is_sudo
-
-		install_graphics "$2"
-	elif [[ $cmd == "wm" ]]; then
-		install_wmapps
-	elif [[ $cmd == "dotfiles" ]]; then
-		get_user
-		get_dotfiles
-	elif [[ $cmd == "vim" ]]; then
-		install_vim
-	elif [[ $cmd == "rust" ]]; then
-		install_rust
-	elif [[ $cmd == "golang" ]]; then
-		install_golang "$2"
-	elif [[ $cmd == "scripts" ]]; then
-		install_scripts
-	elif [[ $cmd == "tools" ]]; then
-		install_tools
-	elif [[ $cmd == "dropbear" ]]; then
-		check_is_sudo
-
-		get_user
-
-		install_dropbear
 	else
 		usage
 	fi

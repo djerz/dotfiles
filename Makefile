@@ -13,7 +13,7 @@ bin: ## Installs the bin directory files.
 	done
 
 .PHONY: clean
-clean: ## Clean everything if dotfiles is removed
+clean: ## Clean everything if dotfiles is removed/moved
 	# delete ~/bin broken symlinks
 	find $(HOME)/bin -xtype l -delete
 

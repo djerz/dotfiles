@@ -1,5 +1,0 @@
-#!/bin/sh
-
-# Covert STDIN or piped text to upper case
-
-tr a-z A-Z
