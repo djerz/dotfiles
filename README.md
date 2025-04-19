@@ -1,7 +1,7 @@
 [![make-test](https://github.com/djerz/dotfiles/actions/workflows/make-test.yml/badge.svg)](https://github.com/djerz/dotfiles/actions/workflows/make-test.yml)
 
 # dotfiles
-my unix env
+Bootstrap my devenv
 
 **Table of Contents**
 
