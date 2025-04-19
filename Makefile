@@ -13,7 +13,7 @@ bin: ## Installs the bin directory files.
 	done
 
 .PHONY: clean
-clean: ##Clean evrything if dotfiles is removed
+clean: ## Clean everything if dotfiles is removed
 	# delete ~/bin broken symlinks
 	find $(HOME)/bin -xtype l -delete
 
@@ -88,6 +88,6 @@ clean: ##Clean evrything if dotfiles is removed
 #		--workdir /usr/src \
 #		jess/shellcheck ./test.sh
 #
-#.PHONY: help
-#help:
-#	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+.PHONY: help
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "%-30s %s\n", $$1, $$2}'

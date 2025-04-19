@@ -1,0 +1,79 @@
+#!/usr/bin/env rc
+
+# ~/.local/bin/startacme.rc - Launcher for plan9port Acme text editor
+#
+# To set fonts (run '9p ls font' to see available non-9p fonts), run acme with
+#   -f $font   : Set variable font ( default: $PLAN9/font/lucsans/euro.8.font )
+#   -F $lfont  : Set fixed font ( default: $PLAN9/font/lucm/unicode.9.font )
+# Plan 9 fonts have the path $PLAN9/font/<FONTNAME>/<FONTFILE>
+# Non-Plan 9 fonts served by fontsrv have the path /mnt/font/<FONTNAME>/<FONTSIZE>a/font
+# E.g.
+#   acme -f /mnt/font/Iosevka-Slab/21a/font -F /mnt/font/Iosevka-Fixed-Slab/21a/font
+#
+# To display labels of pressed buttons, set environment variable visibleclicks=1
+# E.g.
+#   visibleclicks=1 acme
+#
+# To use a given shell (not the user's default) in win, set the SHELL environment variable
+# E.g.
+#   SHELL=rc acme
+#
+# To use a given shell for button 2 execution, set the acmeshell environment variable
+# E.g.
+#   acmeshell=/bin/bash acme
+#
+# This launcher can be used as a drop-in replacement for acme that starts fontsrv and
+# plumber if they are not running, and also sets some environment variables
+#
+# Example command using this launcher
+#   visibleclicks=1 SHELL=rc startacme.rc -f /mnt/font/GoRegular/16a/font -F /mnt/font/GoMono/16a/font
+#
+# Multiple instances of Acme can be run using different namespaces, e.g.
+#   #!/usr/bin/env rc
+#   flag e +
+#   if(~ $#subnamespace 0) {
+#     NAMESPACE=`{namespace}^-$subnamespace
+#     mkdir -p `{namespace}
+#   }
+#   plumber || true
+#   fontsrv || true
+#   exec acme
+#
+# Example using this launcher
+#   #!/bin/sh
+#   # Usage: acme-launcher [-n N]
+#   # Launch acme via startacme.rc and in a sub-namespace if the -n option is specified
+#   if [ "$1" = "-n" ]; then
+#     export NAMESPACE=/tmp/ns.$USER.$DISPLAY-$2
+#     mkdir -p "$NAMESPACE"
+#     shift; shift
+#   fi
+#   $PLAN9/bin/rc $HOME/.local/bin/startacme.rc "$@"
+
+# Default width of a tab in 0 glyph width multiples
+if (~ $#tabstop 0) tabstop=4
+
+# Set specific win environment variables
+TERM=dumb
+PAGER=nobs
+
+# Use editinacme (https://pkg.go.dev/9fans.net/go/acme/editinacme) or $PLAN9/bin/E as the default editor
+if (~ `{which editinacme} */editinacme) EDITOR=editinacme
+if not EDITOR=E
+
+# Update tag line current dir when using cd in win windows
+fn cd { builtin cd $1 && awd $sysname }
+
+# Helper function for checking if a given program is running (or use pgrep)
+fn getprocs {
+	9 psu -a | 9 grep $1 | 9 grep -v grep
+}
+
+# Run only a single instance of plumber
+9p stat plumb >[2]/dev/null >[1=2] || plumber
+
+# Run only a single instance of fontsrv
+9p stat font >[2]/dev/null >[1=2] || fontsrv &
+
+# Run Acme text editor with command line params
+acme $*

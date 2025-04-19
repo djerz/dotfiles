@@ -1,0 +1,22 @@
+#!/usr/bin/env rc
+
+# ~/.local/bin/startsam.rc - launcher for sam
+#
+# To set font (run '9p ls font' to see available non-9p fonts) instead of using
+# the default, set the font variable
+# E.g.
+#    font=/mnt/font/Iosevka-Slab/21a/font sam
+#
+# This launcher can be used as a drop-in replacement for sam that automatically
+# launchers fontsrv and plumber if they are not running
+#
+# Example command using this launcher
+#    font=/mnt/font/GoMono/16a/font startsam.rc
+
+# Run only a single instance of plumber
+9p stat plumb >[2]/dev/null >[1=2] || 9 plumber
+
+# Run only a single instance of fontsrv
+9p stat font >[2]/dev/null >[1=2] || 9 fontsrv &
+
+sam $*

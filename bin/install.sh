@@ -2,6 +2,11 @@
 set -e
 set -o pipefail
 
+#---
+# TODO
+# shellcheck
+#---
+
 # install.sh
 #	This script installs my basic setup for a debian laptop
 
