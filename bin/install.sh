@@ -560,7 +560,9 @@ install_acme() {
 	# plan9port
 	# create subshell
 	(
-	#TODO: patch from plan9port-config
+	#TODO:
+	# - patch from plan9port-config
+	# - add desktop entry to local/share/applications
 	if [[ ! -d "${HOME}/local/plan9port" ]]; then
 		cd "${HOME}/local"
 		git clone git@github.com:djerz/plan9port.git
