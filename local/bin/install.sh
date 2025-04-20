@@ -5,13 +5,13 @@ set -o pipefail
 # ---
 # Folder structure
 # ---
-# ~/bin/
-# ~/bin/acme/
-# ~/lib/guide
-# ~/lib/plumbing
+# ~/local/bin/
+# ~/local/bin/acme/
+# ~/local/lib/guide
+# ~/local/lib/plumbing
 # ~/local/plan9port/
 # ~/local/plan9port-config/
-# ~/notes/
+# ~/local/notes/
 # ---
 
 # install.sh
@@ -202,6 +202,8 @@ base() {
 		libpam-systemd \
 		pinentry-curses \
 		systemd \
+		neovim \
+		meld \
 		build-essential \
 		xorg-dev \
 		--no-install-recommends
@@ -540,8 +542,9 @@ get_dotfiles() {
 install_acme() {
 	# sorry XDG basedir-spec, I don't like .local
 	mkdir -p "${HOME}/local/share/applications"
-	mkdir -p "${HOME}/lib"
-	mkdir -p "${HOME}/bin/acme"
+	mkdir -p "${HOME}/local/share/icons"
+	mkdir -p "${HOME}/local/lib"
+	mkdir -p "${HOME}/local/bin/acme"
 
 	# plan9port-config
 	# create subshell
@@ -552,25 +555,53 @@ install_acme() {
 	fi
 	cd "${HOME}/local/plan9port-config"
 
-	find "${PWD}/stow/dot-acme/bin" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/bin/acme/" \;
-	find "${PWD}/stow/dot-local/bin" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/bin/" \;
-	find "${PWD}/stow/lib" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/lib/" \;
+	find "${PWD}/stow/dot-acme/bin" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/local/bin/acme/" \;
+	find "${PWD}/stow/dot-local/bin" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/local/bin/" \;
+	find "${PWD}/stow/lib" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/local/lib/" \;
 	)
 
 	# plan9port
 	# create subshell
 	(
 	#TODO:
-	# - patch from plan9port-config
 	# - add desktop entry to local/share/applications
+	#   sudo grep -R XDG_DATA_DIRS /etc/
+	#   https://doc.ubuntu-fr.org/raccourci-lanceur
 	if [[ ! -d "${HOME}/local/plan9port" ]]; then
 		cd "${HOME}/local"
 		git clone git@github.com:djerz/plan9port.git
 	fi
+	
+	# Patch from plan9port-config
+	cd "${HOME}/local/plan9port-config/patches"
+	./apply-patches.sh "${HOME}/local/plan9port"
+
+	# Build
 	cd "${HOME}/local/plan9port"
 	./INSTALL -b
 	./INSTALL -c
 	)
+
+	# desktop and icon files
+	# create subshell
+	(
+	# move to dotfiles folder
+	cd "$(dirname "$(realpath "${0}")")/.."
+	ln -sfn "${PWD}/local/share/icons/glenda.ico" "${HOME}/local/share/icons/"
+	cat > "${HOME}/local/share/applications/acme.desktop" <<EOT
+[Desktop Entry]
+Type=Application
+Name=acme
+GenericName=acme
+Comment=plan9port acme
+Icon=${HOME}/local/share/icons/glenda.ico
+Exec=sh -c ${HOME}/local/bin/startacme.sh
+Terminal=false
+StartupNotify=false
+Categories=Application;Texteditor
+EOT
+	)
+
 }
 
 install_vim() {

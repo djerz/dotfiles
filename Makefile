@@ -3,26 +3,34 @@ SHELL := bash
 .PHONY: all
 all: folders bin usr dotfiles etc ## Installs the bin and etc directory files and the dotfiles.
 
-.PHONY: folders
-folders: ## Create home folders structure
-	mkdir -p $(HOME)/bin/acme
-	mkdir -p $(HOME)/local/share/applications
-	mkdir -p $(HOME)/lib
-	mkdir -p $(HOME)/notes
+#.PHONY: folders
+#folders: ## Create home folders structure
+#	mkdir -p $(HOME)/local/bin/acme
+#	mkdir -p $(HOME)/local/share/applications
+#	mkdir -p $(HOME)/local/lib
+#	mkdir -p $(HOME)/local/notes
 
 .PHONY: bin
 bin: ## Installs the bin directory files.
-	# add aliases in ~/bin
-	mkdir -p $(HOME)/bin
-	for file in $(shell find $(CURDIR)/bin -type f -not -name ".*.swp"); do \
+	# add aliases in ~/local/bin
+	mkdir -p $(HOME)/local/bin
+	for file in $(shell find $(CURDIR)/local/bin -type f -not -name ".*.swp"); do \
 		f=$$(basename $$file); \
-		ln -sfn $$file $(HOME)/bin/$$f; \
+		ln -sfn $$file $(HOME)/local/bin/$$f; \
 	done
 
 .PHONY: clean
 clean: ## Clean everything if dotfiles is removed/moved
-	# delete ~/bin broken symlinks
-	find $(HOME)/bin -xtype l -delete
+	# delete ~/local/bin ~/local/share ~/local/lib broken symlinks
+	if [ -d $(HOME)/local/bin ]; then \
+		find $(HOME)/local/bin -xtype l -delete; \
+	fi;
+	if [ -d $(HOME)/local/share ]; then \
+		find $(HOME)/local/share -xtype l -delete; \
+	fi;
+	if [ -d $(HOME)/local/lib ]; then \
+		find $(HOME)/local/lib -xtype l -delete; \
+	fi;
 
 #.PHONY: dotfiles
 #dotfiles: ## Installs the dotfiles.
