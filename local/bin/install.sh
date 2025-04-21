@@ -527,45 +527,39 @@ get_dotfiles() {
 	install_vim;
 }
 
-#rm_chk() {
-#	# ask before deleting
-#	if [[ -e ${1} ]]; then
-#		read -rp "Delete '${1}'? [y/N] " YN && [ "${YN}" = 'y' ] && rm -rf "${1}"
-#	fi
-#}
-#
-#rm_blnk() {
-#	# delete broken links
-#	find "${1}" -xtype l -delete
-#}
-#
-#rm_empty() {
-#	# delete empty directory
-#	#replace with find
-#	#https://www.cyberciti.biz/faq/linux-unix-shell-check-if-directory-empty/
-#	if [[ -d "${1}" ]]; then
-#		[[ "(ls -A "${1}")" ]] || rm_chk "${1}"
-#	fi
-#}
-#
-#remove_acme() {
-#	#uninstall:total 5
-#	#uninstall:2
-#	rm_chk "${HOME}/local/plan9port-config"
-#	#uninstall:3
-#	rm_blnk "${HOME}/local"
-#	#uninstall:4
-#	rm_chk "${HOME}/local/plan9port"
-#	#uninstall:5
-#	rm_chk "${HOME}/local/share/applications/acme.desktop"
-#	#uninstall:1
-#	rm_empty "${HOME}/local/lib"
-#	rm_empty "${HOME}/local/bin/acme"
-#	rm_empty "${HOME}/local/bin"
-#	rm_empty "${HOME}/local/share/applications"
-#	rm_empty "${HOME}/local/share"
-#	rm_empty "${HOME}/local"
-#}
+rm_chk() {
+	# ask before deleting
+	if [[ -e ${1} ]]; then
+		read -rp "Delete '${1}'? [y/N] " YN && [ "${YN}" = 'y' ] && rm -rf "${1}"
+	fi
+}
+
+rm_blnk() {
+	# delete broken links
+	find "${1}" -xtype l -delete
+}
+
+rm_empty() {
+	# delete empty directory
+	# -maxdepth 0 means only apply the tests and actions to the starting-points themselves.
+	#-mindepth 1 means process all files except the starting-points
+	find "${1}" -mindepth 1 -type d -empty -delete
+	#find "${1}" -maxdepth 0 -type d -empty -delete
+}
+
+uninstall_acme() {
+	#uninstall:total 5
+	#uninstall:2
+	rm_chk "${HOME}/local/plan9port-config"
+	#uninstall:3
+	rm_blnk "${HOME}/local"
+	#uninstall:4
+	rm_chk "${HOME}/local/plan9port"
+	#uninstall:5
+	rm_chk "${HOME}/local/share/applications/acme.desktop"
+	#uninstall:1
+	rm_empty "${HOME}/local"
+}
 
 install_acme() {
 	# sorry XDG basedir-spec, I don't like .local
@@ -709,7 +703,7 @@ usage() {
 #	echo "  wm                                  - install window manager/desktop pkgs"
 #	echo "  dotfiles                            - get dotfiles"
 	echo "  acme                                - install acme"
-	echo "  remove_acme                         - remove acme"
+	echo "  uninstall_acme                      - uninstall acme"
 #	echo "  vim                                 - install vim specific dotfiles"
 #	echo "  golang                              - install golang and packages"
 #	echo "  rust                                - install rust"
@@ -754,8 +748,8 @@ main() {
 #	elif [[ $cmd == "vim" ]]; then
 	elif [[ $cmd == "acme" ]]; then
 		install_acme
-	elif [[ $cmd == "remove_acme" ]]; then
-		remove_acme
+	elif [[ $cmd == "uninstall_acme" ]]; then
+		uninstall_acme
 #		install_vim
 #	elif [[ $cmd == "rust" ]]; then
 #		install_rust
