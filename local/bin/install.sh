@@ -2,18 +2,6 @@
 set -e
 set -o pipefail
 
-# ---
-# Folder structure
-# ---
-# ~/local/bin/
-# ~/local/bin/acme/
-# ~/local/lib/guide
-# ~/local/lib/plumbing
-# ~/local/plan9port/
-# ~/local/plan9port-config/
-# ~/local/notes/
-# ---
-
 # install.sh
 #	This script installs my basic setup for a debian/ubuntu laptop
 
@@ -539,22 +527,42 @@ get_dotfiles() {
 	install_vim;
 }
 
+rm_safe() {
+	if [[ -e ${1} ]]; then
+		read -rp "Delete '${1}'? [y/N] " YN && [ "${YN}" = 'y' ] && rm -rf "${1}"
+	fi
+}
+
+remove_acme() {
+	#remtot_4
+	#remove_1
+	rm_safe "${HOME}/local/plan9port-config"
+	#remove_2
+	#broken symbolic links after remove_1
+	find "${HOME}/local" -xtype l -delete
+	#remove_3
+	rm_safe "${HOME}/local/plan9port"
+	#remove_4
+	rm_safe "${HOME}/local/share/applications/acme.desktop"
+}
+
 install_acme() {
 	# sorry XDG basedir-spec, I don't like .local
-	mkdir -p "${HOME}/local/share/applications"
-	mkdir -p "${HOME}/local/share/icons"
 	mkdir -p "${HOME}/local/lib"
 	mkdir -p "${HOME}/local/bin/acme"
+	mkdir -p "${HOME}/local/share/applications"
 
 	# plan9port-config
 	# create subshell
 	(
 	if [[ ! -d "${HOME}/local/plan9port-config" ]]; then
 		cd "${HOME}/local"
+		#remove_1
 		git clone git@github.com:djerz/plan9port-config.git
 	fi
 	cd "${HOME}/local/plan9port-config"
 
+	#remove:2
 	find "${PWD}/stow/dot-acme/bin" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/local/bin/acme/" \;
 	find "${PWD}/stow/dot-local/bin" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/local/bin/" \;
 	find "${PWD}/stow/lib" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/local/lib/" \;
@@ -569,12 +577,14 @@ install_acme() {
 	#   https://doc.ubuntu-fr.org/raccourci-lanceur
 	if [[ ! -d "${HOME}/local/plan9port" ]]; then
 		cd "${HOME}/local"
+		#remove_3
 		git clone git@github.com:djerz/plan9port.git
+
+		# Patch from plan9port-config
+		cd "${HOME}/local/plan9port-config/patches"
+		./apply-patches.sh "${HOME}/local/plan9port"
 	fi
 	
-	# Patch from plan9port-config
-	cd "${HOME}/local/plan9port-config/patches"
-	./apply-patches.sh "${HOME}/local/plan9port"
 
 	# Build
 	cd "${HOME}/local/plan9port"
@@ -582,12 +592,17 @@ install_acme() {
 	./INSTALL -c
 	)
 
-	# desktop and icon files
+	# desktop file
+	# can be tested with:
+	# 	$gio launch ~/local/share/applications/acme.desktop
+	# icon has to come from dotfiles!
 	# create subshell
-	(
+	#(
 	# move to dotfiles folder
-	cd "$(dirname "$(realpath "${0}")")/.."
-	ln -sfn "${PWD}/local/share/icons/glenda.ico" "${HOME}/local/share/icons/"
+	#cd "$(dirname "$(realpath "${0}")")/../.."
+	#ln -sfn "${PWD}/local/share/icons/glenda.ico" "${HOME}/local/share/icons/"
+	#)
+	#remove_4
 	cat > "${HOME}/local/share/applications/acme.desktop" <<EOT
 [Desktop Entry]
 Type=Application
@@ -600,8 +615,7 @@ Terminal=false
 StartupNotify=false
 Categories=Application;Texteditor
 EOT
-	)
-
+	#remtot_4
 }
 
 install_vim() {
@@ -673,6 +687,7 @@ usage() {
 #	echo "  wm                                  - install window manager/desktop pkgs"
 #	echo "  dotfiles                            - get dotfiles"
 	echo "  acme                                - install acme"
+	echo "  remove_acme                         - remove acme"
 #	echo "  vim                                 - install vim specific dotfiles"
 #	echo "  golang                              - install golang and packages"
 #	echo "  rust                                - install rust"
@@ -714,9 +729,11 @@ main() {
 #	elif [[ $cmd == "dotfiles" ]]; then
 #		get_user
 #		get_dotfiles
+#	elif [[ $cmd == "vim" ]]; then
 	elif [[ $cmd == "acme" ]]; then
 		install_acme
-#	elif [[ $cmd == "vim" ]]; then
+	elif [[ $cmd == "remove_acme" ]]; then
+		remove_acme
 #		install_vim
 #	elif [[ $cmd == "rust" ]]; then
 #		install_rust

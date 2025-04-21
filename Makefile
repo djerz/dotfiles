@@ -1,7 +1,8 @@
 SHELL := bash
 
 .PHONY: all
-all: folders bin usr dotfiles etc ## Installs the bin and etc directory files and the dotfiles.
+#all: folders bin usr dotfiles etc ## Installs the bin and etc directory files and the dotfiles.
+all:
 
 #.PHONY: folders
 #folders: ## Create home folders structure
@@ -9,6 +10,21 @@ all: folders bin usr dotfiles etc ## Installs the bin and etc directory files an
 #	mkdir -p $(HOME)/local/share/applications
 #	mkdir -p $(HOME)/local/lib
 #	mkdir -p $(HOME)/local/notes
+
+.PHONY: backup
+backup: ## Backup files outside ~/local that might get overwritten
+	#BAKFOLDER=$(CURDIR)/backup/$$(date '+%Y-%m-%d-%H-%M-%S'); \
+	#if [[ -d $$BAKFOLDER ]]; then \
+	#	exit 1; \
+	#else \
+	#	mkdir -p $$BAKFOLDER; \
+	#	echo success; \
+	#	for file in $(shell find $(CURDIR) -name ".*" -not -name ".gitignore" -not -name ".git" -not -name ".config" -not -name ".github" -not -name ".*.swp" -not -name ".gnupg"); do \
+	#	f=$$(basename $$file); \
+	#	ln -sfn $$file $(HOME)/$$f; \
+	#done; \
+	#fi
+	#echo oui
 
 .PHONY: bin
 bin: ## Installs the bin directory files.
