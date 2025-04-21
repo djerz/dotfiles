@@ -66,7 +66,7 @@ dotfiles: ## Installs the dotfiles.
 	# add aliases for dotfiles
 	for file in $(DOTFILES); do \
 		f=$$(basename $$file); \
-		echo "Install $(HOME)/$$f ..."
+		echo "Install $(HOME)/$$f ..."; \
 		ln -sfn $$file $(HOME)/$$f; \
 	done; 
 #TODO:
