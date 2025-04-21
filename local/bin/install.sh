@@ -527,27 +527,49 @@ get_dotfiles() {
 	install_vim;
 }
 
-rm_safe() {
-	if [[ -e ${1} ]]; then
-		read -rp "Delete '${1}'? [y/N] " YN && [ "${YN}" = 'y' ] && rm -rf "${1}"
-	fi
-}
-
-remove_acme() {
-	#remtot_4
-	#remove_1
-	rm_safe "${HOME}/local/plan9port-config"
-	#remove_2
-	#broken symbolic links after remove_1
-	find "${HOME}/local" -xtype l -delete
-	#remove_3
-	rm_safe "${HOME}/local/plan9port"
-	#remove_4
-	rm_safe "${HOME}/local/share/applications/acme.desktop"
-}
+#rm_chk() {
+#	# ask before deleting
+#	if [[ -e ${1} ]]; then
+#		read -rp "Delete '${1}'? [y/N] " YN && [ "${YN}" = 'y' ] && rm -rf "${1}"
+#	fi
+#}
+#
+#rm_blnk() {
+#	# delete broken links
+#	find "${1}" -xtype l -delete
+#}
+#
+#rm_empty() {
+#	# delete empty directory
+#	#replace with find
+#	#https://www.cyberciti.biz/faq/linux-unix-shell-check-if-directory-empty/
+#	if [[ -d "${1}" ]]; then
+#		[[ "(ls -A "${1}")" ]] || rm_chk "${1}"
+#	fi
+#}
+#
+#remove_acme() {
+#	#uninstall:total 5
+#	#uninstall:2
+#	rm_chk "${HOME}/local/plan9port-config"
+#	#uninstall:3
+#	rm_blnk "${HOME}/local"
+#	#uninstall:4
+#	rm_chk "${HOME}/local/plan9port"
+#	#uninstall:5
+#	rm_chk "${HOME}/local/share/applications/acme.desktop"
+#	#uninstall:1
+#	rm_empty "${HOME}/local/lib"
+#	rm_empty "${HOME}/local/bin/acme"
+#	rm_empty "${HOME}/local/bin"
+#	rm_empty "${HOME}/local/share/applications"
+#	rm_empty "${HOME}/local/share"
+#	rm_empty "${HOME}/local"
+#}
 
 install_acme() {
 	# sorry XDG basedir-spec, I don't like .local
+	#uninstall:1
 	mkdir -p "${HOME}/local/lib"
 	mkdir -p "${HOME}/local/bin/acme"
 	mkdir -p "${HOME}/local/share/applications"
@@ -557,12 +579,12 @@ install_acme() {
 	(
 	if [[ ! -d "${HOME}/local/plan9port-config" ]]; then
 		cd "${HOME}/local"
-		#remove_1
+		#uninstall:2
 		git clone git@github.com:djerz/plan9port-config.git
 	fi
 	cd "${HOME}/local/plan9port-config"
 
-	#remove:2
+	#uninstall:3
 	find "${PWD}/stow/dot-acme/bin" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/local/bin/acme/" \;
 	find "${PWD}/stow/dot-local/bin" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/local/bin/" \;
 	find "${PWD}/stow/lib" -type f -not -name ".*.swp" -exec ln -sfn {} "${HOME}/local/lib/" \;
@@ -577,7 +599,7 @@ install_acme() {
 	#   https://doc.ubuntu-fr.org/raccourci-lanceur
 	if [[ ! -d "${HOME}/local/plan9port" ]]; then
 		cd "${HOME}/local"
-		#remove_3
+		#uninstall:4
 		git clone git@github.com:djerz/plan9port.git
 
 		# Patch from plan9port-config
@@ -602,7 +624,7 @@ install_acme() {
 	#cd "$(dirname "$(realpath "${0}")")/../.."
 	#ln -sfn "${PWD}/local/share/icons/glenda.ico" "${HOME}/local/share/icons/"
 	#)
-	#remove_4
+	#uninstall:5
 	cat > "${HOME}/local/share/applications/acme.desktop" <<EOT
 [Desktop Entry]
 Type=Application
@@ -615,7 +637,7 @@ Terminal=false
 StartupNotify=false
 Categories=Application;Texteditor
 EOT
-	#remtot_4
+	#uninstall:total 5
 }
 
 install_vim() {
