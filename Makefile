@@ -1,3 +1,7 @@
+#TODO:
+# .bashrc and co
+# todo.txt-cli
+
 SHELL := bash
 
 .PHONY: all
@@ -11,19 +15,22 @@ BACKUP := $(CURDIR)/backup/$(shell date '+%Y-%m-%d-%H-%M-%S')
 .PHONY: mk_backup
 mk_backup:
 	mkdir -p $(CURDIR)/backup
+	# fail if already exists
 	mkdir $(BACKUP)
 
 .PHONY: backup
 backup: mk_backup
 backup: ## Backup files outside ~/local that might get overwritten
-	echo $(BACKUP)
 	for file in $(DOTFILES); do \
-		cp $$file $(BACKUP); \
+		f=$$(basename $$file); \
+		if [ -f $(HOME)/$$f ]; then \
+			cp -a $(HOME)/$$f $(BACKUP); \
+		fi; \
 	done; 
 	echo "Backup done!"
 
 .PHONY: bin
-bin: ## Installs the bin directory files.
+bin: ## Installs the bin directory files in ~/local.
 	# add aliases in ~/local/bin
 	mkdir -p $(HOME)/local/bin
 	for file in $(shell find $(CURDIR)/local/bin -type f -not -name ".*.swp"); do \
