@@ -1,30 +1,26 @@
 SHELL := bash
 
 .PHONY: all
-#all: folders bin usr dotfiles etc ## Installs the bin and etc directory files and the dotfiles.
-all:
+#all: bin usr dotfiles etc ## Installs the bin and etc directory files and the dotfiles.
+all: backup
 
-#.PHONY: folders
-#folders: ## Create home folders structure
-#	mkdir -p $(HOME)/local/bin/acme
-#	mkdir -p $(HOME)/local/share/applications
-#	mkdir -p $(HOME)/local/lib
-#	mkdir -p $(HOME)/local/notes
+DOTFILES := $(shell find $(CURDIR) -name ".*" -not -name ".gitignore" -not -name ".git" -not -name ".config" -not -name ".github" -not -name ".*.swp" -not -name ".gnupg")
+
+BACKUP := $(CURDIR)/backup/$(shell date '+%Y-%m-%d-%H-%M-%S')
+
+.PHONY: mk_backup
+mk_backup:
+	mkdir -p $(CURDIR)/backup
+	mkdir $(BACKUP)
 
 .PHONY: backup
+backup: mk_backup
 backup: ## Backup files outside ~/local that might get overwritten
-	#BAKFOLDER=$(CURDIR)/backup/$$(date '+%Y-%m-%d-%H-%M-%S'); \
-	#if [[ -d $$BAKFOLDER ]]; then \
-	#	exit 1; \
-	#else \
-	#	mkdir -p $$BAKFOLDER; \
-	#	echo success; \
-	#	for file in $(shell find $(CURDIR) -name ".*" -not -name ".gitignore" -not -name ".git" -not -name ".config" -not -name ".github" -not -name ".*.swp" -not -name ".gnupg"); do \
-	#	f=$$(basename $$file); \
-	#	ln -sfn $$file $(HOME)/$$f; \
-	#done; \
-	#fi
-	#echo oui
+	echo $(BACKUP)
+	for file in $(DOTFILES); do \
+		cp $$file $(BACKUP); \
+	done; 
+	echo "Backup done!"
 
 .PHONY: bin
 bin: ## Installs the bin directory files.
