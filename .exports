@@ -25,5 +25,7 @@ HISTCONTROL=ignoreboth
 # Don’t clear the screen after quitting a manual page
 export MANPAGER="less -X";
 
+export PATH=$HOME/local/bin:$PATH
+
 #legacy
 export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin

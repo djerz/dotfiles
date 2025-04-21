@@ -6,9 +6,10 @@ SHELL := bash
 
 .PHONY: all
 #all: bin usr dotfiles etc ## Installs the bin and etc directory files and the dotfiles.
-all: backup
+all: backup bin dotfiles
 
-DOTFILES := $(shell find $(CURDIR) -name ".*" -not -name ".gitignore" -not -name ".git" -not -name ".config" -not -name ".github" -not -name ".*.swp" -not -name ".gnupg")
+BINFILES := $(shell find $(CURDIR)/local/bin -type f -not -name ".*.swp")
+DOTFILES := $(shell find $(CURDIR) -name ".*" -not -name ".gitignore" -not -name ".git" -not -name ".config" -not -name ".github" -not -name ".*.swp" -not -name ".gnupg" -not -path '*/backup/*')
 
 BACKUP := $(CURDIR)/backup/$(shell date '+%Y-%m-%d-%H-%M-%S')
 
@@ -24,40 +25,51 @@ backup: ## Backup files outside ~/local that might get overwritten
 	for file in $(DOTFILES); do \
 		f=$$(basename $$file); \
 		if [ -f $(HOME)/$$f ]; then \
+			echo "Backup $(HOME)/$$f ..."; \
 			cp -a $(HOME)/$$f $(BACKUP); \
+		fi; \
+	done; 
+	mkdir -p $(BACKUP)/local/bin
+	for file in $(BINFILES); do \
+		f=$$(basename $$file); \
+		if [ -f $(HOME)/local/bin/$$f ]; then \
+			echo "Backup $(HOME)/local/bin/$$f ..."; \
+			cp -a $(HOME)/local/bin/$$f $(BACKUP)/local/bin; \
 		fi; \
 	done; 
 	echo "Backup done!"
 
 .PHONY: bin
+bin: backup
 bin: ## Installs the bin directory files in ~/local.
 	# add aliases in ~/local/bin
 	mkdir -p $(HOME)/local/bin
-	for file in $(shell find $(CURDIR)/local/bin -type f -not -name ".*.swp"); do \
+	for file in $(BINFILES); do \
 		f=$$(basename $$file); \
 		ln -sfn $$file $(HOME)/local/bin/$$f; \
 	done
 
 .PHONY: clean
-clean: ## Clean everything if dotfiles is removed/moved
-	# delete ~/local/bin ~/local/share ~/local/lib broken symlinks
-	if [ -d $(HOME)/local/bin ]; then \
-		find $(HOME)/local/bin -xtype l -delete; \
+clean: ## Clean broken links if dotfiles is removed/moved
+	echo "Cleaning ..."
+	# recursive in local
+	if [ -d $(HOME)/local ]; then \
+		find $(HOME)/local -xtype l -print -delete; \
 	fi;
-	if [ -d $(HOME)/local/share ]; then \
-		find $(HOME)/local/share -xtype l -delete; \
-	fi;
-	if [ -d $(HOME)/local/lib ]; then \
-		find $(HOME)/local/lib -xtype l -delete; \
-	fi;
+	# non-recursive in ~
+	find $(HOME) -maxdepth 1 -xtype l -print -delete
+	echo "Clean done!"
 
-#.PHONY: dotfiles
-#dotfiles: ## Installs the dotfiles.
-#	# add aliases for dotfiles
-#	for file in $(shell find $(CURDIR) -name ".*" -not -name ".gitignore" -not -name ".git" -not -name ".config" -not -name ".github" -not -name ".*.swp" -not -name ".gnupg"); do \
-#		f=$$(basename $$file); \
-#		ln -sfn $$file $(HOME)/$$f; \
-#	done; \
+.PHONY: dotfiles
+dotfiles: backup
+dotfiles: ## Installs the dotfiles.
+	# add aliases for dotfiles
+	for file in $(DOTFILES); do \
+		f=$$(basename $$file); \
+		echo "Install $(HOME)/$$f ..."
+		ln -sfn $$file $(HOME)/$$f; \
+	done; 
+#TODO:
 #	ln -fn $(CURDIR)/gitignore $(HOME)/.gitignore;
 #	git update-index --skip-worktree $(CURDIR)/.gitconfig;
 #	mkdir -p $(HOME)/.config;
