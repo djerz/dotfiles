@@ -574,7 +574,8 @@ install_acme() {
 	if [[ ! -d "${HOME}/local/plan9port-config" ]]; then
 		cd "${HOME}/local"
 		#uninstall:2
-		git clone git@github.com:djerz/plan9port-config.git
+		#git clone git@github.com:djerz/plan9port-config.git
+		git clone https://github.com/djerz/plan9port-config.git
 	fi
 	cd "${HOME}/local/plan9port-config"
 
@@ -594,7 +595,8 @@ install_acme() {
 	if [[ ! -d "${HOME}/local/plan9port" ]]; then
 		cd "${HOME}/local"
 		#uninstall:4
-		git clone git@github.com:djerz/plan9port.git
+		#git clone git@github.com:djerz/plan9port.git
+		git clone https://github.com/djerz/plan9port.git
 
 		# Patch from plan9port-config
 		cd "${HOME}/local/plan9port-config/patches"
