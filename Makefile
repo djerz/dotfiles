@@ -1,7 +1,3 @@
-#TODO:
-# .bashrc and co
-# todo.txt-cli
-
 SHELL := bash
 
 .PHONY: all

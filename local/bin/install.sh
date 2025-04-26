@@ -536,15 +536,58 @@ rm_chk() {
 
 rm_blnk() {
 	# delete broken links
-	find "${1}" -xtype l -delete
+	if [[ -e ${1} ]]; then
+		find "${1}" -xtype l -delete
+	fi
 }
 
 rm_empty() {
 	# delete empty directory
 	# -maxdepth 0 means only apply the tests and actions to the starting-points themselves.
 	#-mindepth 1 means process all files except the starting-points
-	find "${1}" -mindepth 1 -type d -empty -delete
-	#find "${1}" -maxdepth 0 -type d -empty -delete
+	if [[ -d ${1} ]]; then
+		find "${1}" -mindepth 1 -type d -empty -delete
+		find "${1}" -maxdepth 0 -type d -empty -delete
+	fi
+}
+
+uninstall_todotxt() {
+	#uninstall:total 3
+	#uninstall:2
+	rm_chk "${HOME}/local/todo.txt-cli"
+	#uninstall:3
+	rm_blnk "${HOME}/local"
+	rm_blnk "${HOME}/.todo"
+	rm_empty "${HOME}/.todo"
+	rm_blnk "${HOME}/.local/share/bash-completion/completions"
+	rm_empty "${HOME}/.local/share/bash-completion"
+	#uninstall:1
+	rm_empty "${HOME}/local"
+}
+
+install_todotxt() {
+	#uninstall:1
+	mkdir -p "${HOME}/local/bin/"
+	mkdir -p "${HOME}/.local/share/bash-completion/completions"
+	mkdir -p "${HOME}/.todo"
+	mkdir -p mkdir -p "${HOME}/local/notes/$(whoami)@$(hostname)"
+
+	# todo.txt-cli
+	# create subshell
+	(
+	if [[ ! -d "${HOME}/local/todo.txt-cli" ]]; then
+		cd "${HOME}/local"
+		#uninstall:2
+		#git clone git@github.com:djerz/todo.txt-cli.git
+		git clone https://github.com/djerz/todo.txt-cli.git
+	fi
+	cd "${HOME}/local/todo.txt-cli"
+	#uninstall:3
+	ln -sfn "${PWD}/todo.sh" "${HOME}/local/bin/"
+	ln -sfn "${PWD}/todo_completion" "${HOME}/.local/share/bash-completion/completions/todo.sh"
+	ln -sfn "${PWD}/todo.cfg" "${HOME}/.todo/config"
+	)
+	#uninstall:total 3
 }
 
 uninstall_acme() {
@@ -706,6 +749,8 @@ usage() {
 #	echo "  dotfiles                            - get dotfiles"
 	echo "  acme                                - install acme"
 	echo "  uninstall_acme                      - uninstall acme"
+	echo "  todotxt                             - install todo.txt-cli"
+	echo "  uninstall_todotxt                   - uninstall todo.txt-cli"
 #	echo "  vim                                 - install vim specific dotfiles"
 #	echo "  golang                              - install golang and packages"
 #	echo "  rust                                - install rust"
@@ -752,6 +797,10 @@ main() {
 		install_acme
 	elif [[ $cmd == "uninstall_acme" ]]; then
 		uninstall_acme
+	elif [[ $cmd == "todotxt" ]]; then
+		install_todotxt
+	elif [[ $cmd == "uninstall_todotxt" ]]; then
+		uninstall_todotxt
 #		install_vim
 #	elif [[ $cmd == "rust" ]]; then
 #		install_rust
