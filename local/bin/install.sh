@@ -1,3 +1,6 @@
+#TODO:
+# - way to replace GH https with git
+
 #!/bin/bash
 set -e
 set -o pipefail
