@@ -611,6 +611,7 @@ uninstall_acme() {
 }
 
 install_acme() {
+	arg1=${1}
 	# sorry XDG basedir-spec, I don't like .local
 	#uninstall:1
 	mkdir -p "${HOME}/local/lib"
@@ -650,6 +651,10 @@ install_acme() {
 		# Patch from plan9port-config
 		cd "${HOME}/local/plan9port-config/patches"
 		./apply-patches.sh "${HOME}/local/plan9port"
+		if [ "$arg1" = "wayland" ]; then
+			cd "${HOME}/local/plan9port-config/patches/wayland"
+			./apply-patches.sh "${HOME}/local/plan9port"
+		fi
 	fi
 	
 
@@ -754,6 +759,7 @@ usage() {
 #	echo "  wm                                  - install window manager/desktop pkgs"
 #	echo "  dotfiles                            - get dotfiles"
 	echo "  acme                                - install acme"
+	echo "  acme_wayland                        - install acme wayland"
 	echo "  uninstall_acme                      - uninstall acme"
 	echo "  todotxt                             - install todo.txt-cli"
 	echo "  uninstall_todotxt                   - uninstall todo.txt-cli"
@@ -801,6 +807,8 @@ main() {
 #	elif [[ $cmd == "vim" ]]; then
 	elif [[ $cmd == "acme" ]]; then
 		install_acme
+	elif [[ $cmd == "acme_wayland" ]]; then
+		install_acme wayland
 	elif [[ $cmd == "uninstall_acme" ]]; then
 		uninstall_acme
 	elif [[ $cmd == "todotxt" ]]; then
