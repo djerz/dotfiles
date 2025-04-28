@@ -1,5 +1,8 @@
 #TODO:
 # - way to replace GH https with git
+# - notes gpg and upload
+# - conda and Bitnet
+
 
 #!/bin/bash
 set -e
